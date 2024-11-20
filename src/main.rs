@@ -18,6 +18,11 @@ fn get_word(api_key: &str) -> Result<Data, Box<dyn std::error::Error>> {
     Ok(word)
 }
 
+fn lives(symbol: char, count: usize) {
+    let result = symbol.to_string().repeat(count);
+    println!("{}", result);
+}
+
 fn main() {
     dotenv().ok();
     let api_key = env::var("API_KEY").expect("API_KEY not set as environment variable");
@@ -36,6 +41,8 @@ fn main() {
                     Ok(words) => {
                         let id = words._id;
                         let word = words.word;
+
+                        lives('❤', 5);
                         println!("Word: {:?}", word);
                         println!("ID: {:?}", id);
                     }
