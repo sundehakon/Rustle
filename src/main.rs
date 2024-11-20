@@ -4,6 +4,7 @@ use std::env;
 use std::io;
 use dotenv::dotenv;
 use colored::Colorize;
+use std::process::Command;
 
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -19,6 +20,15 @@ fn get_word(api_key: &str) -> Result<Data, Box<dyn std::error::Error>> {
     let word = response.json::<Data>()?;
     Ok(word)
 }
+
+fn clear_screen() {
+    if cfg!(target_os = "windows") {
+        Command::new("cls").status().unwrap();
+    } else {
+        Command::new("clear").status().unwrap();
+    }
+}
+
 
 fn main() {
     dotenv().ok();
@@ -36,10 +46,11 @@ fn main() {
             "y" => {
                 match get_word(&api_key) {
                     Ok(words) => {
-                        let word = words.word;
+                        let word = words.word.to_lowercase();
                         println!("{}", word);
 
                         let mut guess = String::new();
+                        clear_screen();
                         
                         for _ in 1..=5  {
                             guess.clear();
@@ -47,10 +58,10 @@ fn main() {
                                 .read_line(&mut guess)
                                 .expect("Failed to read input");
 
-                            let guess = guess.trim();
+                            let guess = guess.trim().to_lowercase();
 
                             if guess.len() != word.len() {
-                                println!("Enter a word of length 5");
+                                println!("Five letter words only!");
                                 continue;
                             }
 
@@ -59,15 +70,19 @@ fn main() {
                                 if w != g {
                                     print!("{}", g.to_string().red());
                                     correct = false;
+                                } else if w == g {
+                                    print!("{}", g.to_string().green());
                                 }
                             }
 
+                            println!();
+
                             if correct {
+                                println!();
                                 println!("Correct!");
                                 break; 
-                            } else {
-                                println!("Incorrect. Try again.");
                             }
+                            println!();
                         }
                     }
                     Err(e) => {
