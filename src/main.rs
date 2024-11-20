@@ -1,7 +1,9 @@
 use reqwest::{self};
 use serde::{Deserialize, Serialize};
 use std::env;
+use std::io;
 use dotenv::dotenv;
+use colored::Colorize;
 
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -37,16 +39,34 @@ fn main() {
                         let word = words.word;
                         println!("{}", word);
 
-                        println!("Enter word:");
                         let mut guess = String::new();
-                        std::io::stdin().read_line(&mut guess).unwrap();
                         
                         for _ in 1..=5  {
-                            if guess.trim() == word {
-                                println!("Correct.");
-                                break;
+                            guess.clear();
+                            io::stdin()
+                                .read_line(&mut guess)
+                                .expect("Failed to read input");
+
+                            let guess = guess.trim();
+
+                            if guess.len() != word.len() {
+                                println!("Enter a word of length 5");
+                                continue;
+                            }
+
+                            let mut correct = true;
+                            for (w, g) in word.chars().zip(guess.chars()) {
+                                if w != g {
+                                    print!("{}", g.to_string().red());
+                                    correct = false;
+                                }
+                            }
+
+                            if correct {
+                                println!("Correct!");
+                                break; 
                             } else {
-                                println!("Incorrect guess. Try again!");
+                                println!("Incorrect. Try again.");
                             }
                         }
                     }
